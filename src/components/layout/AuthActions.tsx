@@ -1,10 +1,19 @@
 "use client";
 
-import { useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Button, Skeleton, buttonVariants } from "@heroui/react";
-import { ArrowRightFromSquare, Person } from "@gravity-ui/icons";
+import { usePathname, useRouter } from "next/navigation";
+import { Skeleton, buttonVariants } from "@heroui/react";
+import {
+  ArrowRightFromSquare,
+  ChevronDown,
+  Person,
+} from "@gravity-ui/icons";
 import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client";
 
@@ -15,7 +24,31 @@ interface AuthActionsProps {
 
 function getUserInitial(name?: string | null, email?: string | null): string {
   const source = (name || email || "ব").trim();
-  return source.charAt(0).toUpperCase() || "ব";
+  return Array.from(source)[0]?.toUpperCase() || "ব";
+}
+
+function getFullDisplayName(
+  name?: string | null,
+  email?: string | null
+): string {
+  const trimmedName = name?.trim();
+  if (trimmedName) {
+    return trimmedName;
+  }
+  const emailPrefix = email?.split("@")[0]?.trim();
+  return emailPrefix || "ব্যবহারকারী";
+}
+
+function getShortDisplayName(
+  name?: string | null,
+  email?: string | null
+): string {
+  const trimmedName = name?.trim();
+  if (trimmedName) {
+    return trimmedName.split(/\s+/)[0] || trimmedName;
+  }
+  const emailPrefix = email?.split("@")[0]?.trim();
+  return emailPrefix || "ব্যবহারকারী";
 }
 
 function isSafeImageUrl(url?: string | null): url is string {
@@ -40,12 +73,12 @@ function UserAvatarBadge({ name, email, image }: UserAvatarBadgeProps) {
   const canRenderImage = isSafeImageUrl(image) && failedImageUrl !== image;
 
   return (
-    <span className="w-7 h-7 rounded-lg bg-[#05893e] text-[#f3fbf4] text-xs font-bold flex items-center justify-center overflow-hidden shrink-0">
+    <span className="w-9 h-9 rounded-[10.5px] bg-[#05893e] text-[#f3fbf4] text-sm font-bold flex items-center justify-center overflow-hidden shrink-0 shadow-2xs select-none">
       {canRenderImage ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={image}
-          alt={name || "ব্যবহারকারী"}
+          alt={name?.trim() || "ব্যবহারকারী"}
           referrerPolicy="no-referrer"
           onError={() => setFailedImageUrl(image)}
           className="w-full h-full object-cover"
@@ -62,9 +95,81 @@ export default function AuthActions({
   fullWidth = false,
 }: AuthActionsProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
+  const [openPathname, setOpenPathname] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const isSigningOutRef = useRef(false);
+
+  const isDropdownOpen = openPathname === pathname;
+
+  const dropdownContainerRef = useRef<HTMLDivElement>(null);
+  const triggerButtonRef = useRef<HTMLButtonElement>(null);
+  const profileItemRef = useRef<HTMLAnchorElement>(null);
+  const signOutItemRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!isDropdownOpen) {
+      return;
+    }
+
+    function handlePointerDownOutside(event: MouseEvent | TouchEvent) {
+      const target = event.target as Node | null;
+      if (
+        dropdownContainerRef.current &&
+        target &&
+        !dropdownContainerRef.current.contains(target)
+      ) {
+        setOpenPathname(null);
+      }
+    }
+
+    function handleEscapeKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpenPathname(null);
+        triggerButtonRef.current?.focus();
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDownOutside);
+    document.addEventListener("touchstart", handlePointerDownOutside);
+    document.addEventListener("keydown", handleEscapeKey);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDownOutside);
+      document.removeEventListener("touchstart", handlePointerDownOutside);
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [isDropdownOpen]);
+
+  function handleTriggerKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setOpenPathname(pathname);
+      requestAnimationFrame(() => {
+        profileItemRef.current?.focus();
+      });
+    }
+  }
+
+  function handleMenuKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      if (document.activeElement === profileItemRef.current) {
+        signOutItemRef.current?.focus();
+      } else {
+        profileItemRef.current?.focus();
+      }
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      if (document.activeElement === signOutItemRef.current) {
+        profileItemRef.current?.focus();
+      } else {
+        signOutItemRef.current?.focus();
+      }
+    }
+  }
 
   async function handleSignOut() {
     if (isSigningOutRef.current) {
@@ -84,6 +189,7 @@ export default function AuthActions({
         return;
       }
 
+      setOpenPathname(null);
       onNavigate?.();
       toast.success("সফলভাবে সাইন আউট হয়েছে।");
       router.push("/");
@@ -104,114 +210,161 @@ export default function AuthActions({
         className={
           fullWidth
             ? "flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full"
-            : "flex items-center gap-2.5"
+            : "flex items-center gap-2"
         }
       >
-        <Skeleton
-          className={
-            fullWidth ? "h-9 w-full rounded-lg" : "h-9 w-24 rounded-lg"
-          }
-        />
-        <Skeleton
-          className={
-            fullWidth ? "h-9 w-full rounded-lg" : "h-9 w-24 rounded-lg"
-          }
-        />
+        {fullWidth ? (
+          <>
+            <Skeleton className="h-9 w-full rounded-lg" />
+            <Skeleton className="h-9 w-full rounded-lg" />
+          </>
+        ) : (
+          <Skeleton className="h-10 w-28 rounded-lg" />
+        )}
       </div>
     );
   }
 
   if (session?.user) {
-    const displayName =
-      session.user.name?.trim() ||
-      session.user.email?.split("@")[0] ||
-      "ব্যবহারকারী";
+    const fullName = getFullDisplayName(session.user.name, session.user.email);
+    const shortName = getShortDisplayName(session.user.name, session.user.email);
+    const userEmail = session.user.email?.trim() || "";
 
     if (fullWidth) {
       return (
-        <div className="flex flex-col gap-3 w-full">
-          <div className="flex items-center gap-3 rounded-xl border border-[#e1e8e1] bg-[#f0f5f0]/60 px-3 py-2.5">
+        <div className="w-full rounded-2xl border border-[#e1e8e1] bg-[#fafcfa] p-2.5 shadow-2xs">
+          <div className="flex items-center gap-3 px-3 py-2 text-left">
             <UserAvatarBadge
               name={session.user.name}
               email={session.user.email}
               image={session.user.image}
             />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-[#1d271f] truncate">
-                {displayName}
+              <p className="text-sm font-semibold text-[#1d271f] leading-snug truncate">
+                {fullName}
               </p>
-              {session.user.email ? (
-                <p className="text-xs text-[#1d271f]/60 truncate">
-                  {session.user.email}
+              {userEmail ? (
+                <p className="text-xs text-[#1d271f]/65 leading-normal truncate">
+                  {userEmail}
                 </p>
               ) : null}
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full">
+          <div className="mt-1 flex flex-col">
             <Link
               href="/profile"
               onClick={onNavigate}
-              className={`${buttonVariants({
-                variant: "outline",
-                size: "sm",
-                fullWidth: true,
-              })} border border-[#e1e8e1] bg-white hover:bg-[#f0f5f0] text-[#1d271f] font-semibold px-4 py-2 rounded-lg inline-flex items-center justify-center gap-2 transition-colors`}
+              className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-normal text-[#1d271f] hover:bg-[#f0f5f0] focus:outline-none focus-visible:bg-[#f0f5f0] transition-colors"
             >
-              <Person className="w-4 h-4 text-[#05893e]" aria-hidden="true" />
-              <span>প্রোফাইল</span>
+              <Person
+                className="w-4 h-4 text-[#1d271f]/75 shrink-0"
+                aria-hidden="true"
+              />
+              <span>আমার প্রোফাইল</span>
             </Link>
 
-            <Button
+            <button
               type="button"
-              variant="outline"
-              size="sm"
-              isDisabled={isSigningOut}
-              onPress={handleSignOut}
-              className="w-full border border-[#d03739]/35 bg-white hover:bg-[#d03739]/10 text-[#d03739] font-semibold px-4 py-2 rounded-lg inline-flex items-center justify-center gap-2 transition-colors disabled:opacity-60"
+              disabled={isSigningOut}
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-normal text-[#d03739] hover:bg-[#fff6f5] focus:outline-none focus-visible:bg-[#fff6f5] transition-colors cursor-pointer disabled:opacity-60 text-left"
             >
-              <ArrowRightFromSquare className="w-4 h-4" aria-hidden="true" />
-              <span>
-                {isSigningOut ? "সাইন আউট হচ্ছে..." : "সাইন আউট"}
-              </span>
-            </Button>
+              <ArrowRightFromSquare
+                className="w-4 h-4 text-[#d03739] shrink-0"
+                aria-hidden="true"
+              />
+              <span>{isSigningOut ? "সাইন আউট হচ্ছে..." : "সাইন আউট"}</span>
+            </button>
           </div>
         </div>
       );
     }
 
     return (
-      <div className="flex items-center gap-2.5">
-        <Link
-          href="/profile"
-          onClick={onNavigate}
-          aria-label={`${displayName} - প্রোফাইল`}
-          className="h-9 pl-1.5 pr-3 rounded-lg border border-[#e1e8e1] bg-white hover:bg-[#f0f5f0] text-[#1d271f] inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#05893e]"
+      <div ref={dropdownContainerRef} className="relative inline-flex items-center">
+        <button
+          ref={triggerButtonRef}
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded={isDropdownOpen}
+          aria-controls="navbar-user-dropdown"
+          onClick={() =>
+            setOpenPathname((prev) => (prev === pathname ? null : pathname))
+          }
+          onKeyDown={handleTriggerKeyDown}
+          className="h-10 px-2.5 rounded-lg inline-flex items-center gap-2 text-[#1d271f] hover:bg-[#f0f5f0] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#05893e]"
         >
           <UserAvatarBadge
             name={session.user.name}
             email={session.user.email}
             image={session.user.image}
           />
-          <span className="max-w-[120px] truncate text-sm font-semibold text-[#1d271f]">
-            {displayName}
+          <span className="max-w-[120px] truncate text-sm font-medium text-[#1d271f]">
+            {shortName}
           </span>
-          <span className="rounded-md bg-[#05893e]/10 px-2 py-0.5 text-xs font-semibold text-[#05893e]">
-            প্রোফাইল
-          </span>
-        </Link>
+          <ChevronDown
+            aria-hidden="true"
+            className={`w-3.5 h-3.5 text-[#1d271f]/80 shrink-0 transition-transform duration-150 ${
+              isDropdownOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
 
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          isDisabled={isSigningOut}
-          onPress={handleSignOut}
-          className="h-9 border border-[#d03739]/35 bg-white hover:bg-[#d03739]/10 text-[#d03739] font-semibold px-3.5 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors disabled:opacity-60"
-        >
-          <ArrowRightFromSquare className="w-4 h-4" aria-hidden="true" />
-          <span>{isSigningOut ? "সাইন আউট হচ্ছে..." : "সাইন আউট"}</span>
-        </Button>
+        {isDropdownOpen ? (
+          <div
+            id="navbar-user-dropdown"
+            role="menu"
+            aria-label="ব্যবহারকারী মেনু"
+            onKeyDown={handleMenuKeyDown}
+            className="absolute right-0 top-[calc(100%+8px)] z-50 w-[260px] max-w-[calc(100vw-2rem)] rounded-2xl border border-[#e1e8e1] bg-[#fafcfa] p-2.5 shadow-[0_4px_6px_-4px_rgba(0,0,0,0.1),0_10px_15px_-3px_rgba(0,0,0,0.1)]"
+          >
+            <div className="px-3 py-2 text-left">
+              <p className="text-sm font-semibold text-[#1d271f] leading-snug truncate">
+                {fullName}
+              </p>
+              {userEmail ? (
+                <p className="text-xs text-[#1d271f]/65 leading-normal truncate mt-0.5">
+                  {userEmail}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="flex flex-col">
+              <Link
+                ref={profileItemRef}
+                href="/profile"
+                role="menuitem"
+                onClick={() => {
+                  setOpenPathname(null);
+                  onNavigate?.();
+                }}
+                className="w-full flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm font-normal text-[#1d271f] hover:bg-[#f0f5f0] focus:outline-none focus-visible:bg-[#f0f5f0] transition-colors"
+              >
+                <Person
+                  className="w-4 h-4 text-[#1d271f]/75 shrink-0"
+                  aria-hidden="true"
+                />
+                <span>আমার প্রোফাইল</span>
+              </Link>
+
+              <button
+                ref={signOutItemRef}
+                type="button"
+                role="menuitem"
+                disabled={isSigningOut}
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm font-normal text-[#d03739] hover:bg-[#fff6f5] focus:outline-none focus-visible:bg-[#fff6f5] transition-colors cursor-pointer disabled:opacity-60 text-left"
+              >
+                <ArrowRightFromSquare
+                  className="w-4 h-4 text-[#d03739] shrink-0"
+                  aria-hidden="true"
+                />
+                <span>{isSigningOut ? "সাইন আউট হচ্ছে..." : "সাইন আউট"}</span>
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -250,3 +403,4 @@ export default function AuthActions({
     </div>
   );
 }
+
