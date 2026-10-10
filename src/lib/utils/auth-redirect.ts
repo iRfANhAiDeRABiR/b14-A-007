@@ -57,3 +57,13 @@ export function buildAuthPageHref(
   return `${basePath}?${params.toString()}`;
 }
 
+export function buildProtectedSignInRedirectUrl(rawTargetPath: string): string {
+  const safeCallback = resolveSafeCallbackUrl(rawTargetPath);
+  const params = new URLSearchParams({
+    callbackUrl: safeCallback,
+    reason: "auth_required",
+  });
+  return `/signin?${params.toString()}`;
+}
+
+

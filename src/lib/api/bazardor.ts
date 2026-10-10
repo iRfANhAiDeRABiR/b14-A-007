@@ -1,9 +1,14 @@
-import type { CategoryItem, MarketProduct } from "@/types/market";
+import type {
+  CategoryItem,
+  MarketProduct,
+  ProductDetail,
+} from "@/types/market";
 import {
   normalizeCategories,
   normalizeCategory,
   normalizeProduct,
   normalizeProducts,
+  toProductDetail,
 } from "@/lib/utils/prices";
 
 const PRIMARY_API_BASE_URL =
@@ -161,7 +166,7 @@ export async function getProductById(
   idOrSlug: string | number
 ): Promise<MarketProduct | null> {
   const identifier = String(idOrSlug).trim();
-  if (!identifier) {
+  if (!identifier || !/^[a-zA-Z0-9_-]+$/.test(identifier)) {
     return null;
   }
 
@@ -185,5 +190,15 @@ export async function getProductById(
       (product) => product.slug === identifier || product.id === identifier
     ) ?? null
   );
+}
+
+export async function getProductDetailById(
+  idOrSlug: string | number
+): Promise<ProductDetail | null> {
+  const product = await getProductById(idOrSlug);
+  if (!product) {
+    return null;
+  }
+  return toProductDetail(product);
 }
 

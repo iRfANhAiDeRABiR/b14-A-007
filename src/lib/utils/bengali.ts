@@ -58,7 +58,14 @@ export function formatBengaliNumber(
 export function formatBengaliPrice(
   value: number | string | null | undefined
 ): string | null {
-  const formatted = formatBengaliNumber(value, {
+  const numeric = parseLocalizedNumber(value);
+  if (numeric === null) {
+    return null;
+  }
+
+  const hasFraction = !Number.isInteger(numeric);
+  const formatted = formatBengaliNumber(numeric, {
+    minimumFractionDigits: hasFraction ? 2 : 0,
     maximumFractionDigits: 2,
   });
 

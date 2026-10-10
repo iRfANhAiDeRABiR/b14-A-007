@@ -46,6 +46,7 @@ export interface MarketEntry {
   division: string;
   min: number | null;
   max: number | null;
+  average: number | null;
 }
 
 export interface MarketProduct {
@@ -66,6 +67,19 @@ export interface MarketProduct {
   changePercent: number | null;
   direction: PriceDirection;
   markets: MarketEntry[];
+}
+
+export interface ProductPriceSummary {
+  minPrice: number | null;
+  maxPrice: number | null;
+  averagePrice: number | null;
+  lowestMarketName: string | null;
+  highestMarketName: string | null;
+}
+
+export interface ProductDetail extends MarketProduct {
+  description: string;
+  priceSummary: ProductPriceSummary;
 }
 
 export interface CategoryItem {

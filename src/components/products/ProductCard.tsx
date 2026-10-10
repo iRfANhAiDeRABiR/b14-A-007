@@ -13,7 +13,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link
-      href={`/product/${product.slug}`}
+      href={`/product/${product.id}`}
       aria-label={`${product.name} — ${product.unit} — আজকের দাম ${formattedPrice ?? "দাম পাওয়া যায়নি"}`}
       className="group block h-full rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#05893e]"
     >

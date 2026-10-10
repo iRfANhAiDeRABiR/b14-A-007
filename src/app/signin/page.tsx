@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import AuthLayout from "@/components/auth/AuthLayout";
+import AuthRedirectToast from "@/components/auth/AuthRedirectToast";
 import SignInForm from "@/components/auth/SignInForm";
 import { getAllCategories, getAllProducts } from "@/lib/api/bazardor";
 import { getConfiguredSocialProviders } from "@/lib/auth";
@@ -17,6 +18,7 @@ interface SignInPageProps {
   searchParams: Promise<{
     callbackUrl?: string | string[];
     error?: string | string[];
+    reason?: string | string[];
   }>;
 }
 
@@ -26,6 +28,10 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   const oauthError =
     typeof resolvedParams.error === "string"
       ? resolvedParams.error
+      : undefined;
+  const redirectReason =
+    typeof resolvedParams.reason === "string"
+      ? resolvedParams.reason
       : undefined;
 
   const session = await getServerSession();
@@ -53,6 +59,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
       categories={categories}
       tickerItems={tickerItems}
     >
+      <AuthRedirectToast reason={redirectReason} />
       <SignInForm
         callbackUrl={safeCallbackUrl}
         oauthError={oauthError}

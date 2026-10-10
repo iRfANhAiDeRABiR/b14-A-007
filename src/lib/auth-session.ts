@@ -1,9 +1,14 @@
 import { headers } from "next/headers";
 import { auth, type AuthSession } from "@/lib/auth";
 
-export async function getServerSession(): Promise<AuthSession | null> {
+export type ServerSessionResult =
+  | { status: "authenticated"; session: AuthSession }
+  | { status: "unauthenticated"; session: null }
+  | { status: "error"; session: null };
+
+export async function getServerSessionResult(): Promise<ServerSessionResult> {
   if (!process.env.MONGODB_URI?.trim()) {
-    return null;
+    return { status: "error", session: null };
   }
 
   try {
@@ -16,8 +21,18 @@ export async function getServerSession(): Promise<AuthSession | null> {
     const session = await auth.api.getSession({
       headers: requestHeaders,
     });
-    return session ?? null;
+
+    if (session?.user && session?.session) {
+      return { status: "authenticated", session };
+    }
+
+    return { status: "unauthenticated", session: null };
   } catch {
-    return null;
+    return { status: "error", session: null };
   }
+}
+
+export async function getServerSession(): Promise<AuthSession | null> {
+  const result = await getServerSessionResult();
+  return result.session;
 }

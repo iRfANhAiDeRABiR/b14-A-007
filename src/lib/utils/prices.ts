@@ -3,12 +3,15 @@ import type {
   MarketEntry,
   MarketProduct,
   PriceDirection,
+  ProductDetail,
+  ProductPriceSummary,
   RawApiCategory,
   RawApiMarketEntry,
   RawApiProduct,
   TickerProductItem,
 } from "@/types/market";
 import {
+  formatBengaliNumber,
   formatBengaliShortUnit,
   formatBengaliUnit,
   parseLocalizedNumber,
@@ -99,11 +102,21 @@ function normalizeMarketEntry(raw: RawApiMarketEntry): MarketEntry | null {
   const min = parseLocalizedNumber(raw.min);
   const max = parseLocalizedNumber(raw.max);
 
+  let average: number | null = null;
+  if (min !== null && max !== null) {
+    average = Number(((min + max) / 2).toFixed(2));
+  } else if (min !== null) {
+    average = min;
+  } else if (max !== null) {
+    average = max;
+  }
+
   return {
     market,
     division,
     min,
     max,
+    average,
   };
 }
 
@@ -315,4 +328,103 @@ export function sortProductsByPrice(
     .map((entry) => entry.product);
 }
 
+export function calculateProductPriceSummary(
+  markets: readonly MarketEntry[]
+): ProductPriceSummary {
+  let minPrice: number | null = null;
+  let maxPrice: number | null = null;
+  let lowestMarketName: string | null = null;
+  let highestMarketName: string | null = null;
+  const validAverages: number[] = [];
 
+  for (const entry of markets) {
+    const candidateMin = entry.min ?? entry.max;
+    const candidateMax = entry.max ?? entry.min;
+
+    if (
+      candidateMin !== null &&
+      Number.isFinite(candidateMin) &&
+      candidateMin > 0
+    ) {
+      if (minPrice === null || candidateMin < minPrice) {
+        minPrice = candidateMin;
+        lowestMarketName = entry.market;
+      }
+    }
+
+    if (
+      candidateMax !== null &&
+      Number.isFinite(candidateMax) &&
+      candidateMax > 0
+    ) {
+      if (maxPrice === null || candidateMax > maxPrice) {
+        maxPrice = candidateMax;
+        highestMarketName = entry.market;
+      }
+    }
+
+    if (
+      entry.average !== null &&
+      Number.isFinite(entry.average) &&
+      entry.average > 0
+    ) {
+      validAverages.push(entry.average);
+    }
+  }
+
+  const averagePrice =
+    validAverages.length > 0
+      ? Math.round(
+          validAverages.reduce((sum, val) => sum + val, 0) /
+            validAverages.length
+        )
+      : null;
+
+  return {
+    minPrice,
+    maxPrice,
+    averagePrice,
+    lowestMarketName,
+    highestMarketName,
+  };
+}
+
+function buildProductDescription(product: MarketProduct): string {
+  if (product.currentPrice !== null && product.yesterdayPrice !== null) {
+    const diff = Number(
+      Math.abs(product.currentPrice - product.yesterdayPrice).toFixed(2)
+    );
+    const formattedDiff = formatBengaliNumber(diff, {
+      maximumFractionDigits: 2,
+    });
+
+    if (diff > 0 && formattedDiff) {
+      if (product.currentPrice > product.yesterdayPrice) {
+        return `গতকালের তুলনায় আজ দাম বেড়েছে · ${formattedDiff} টাকা`;
+      }
+      return `গতকালের তুলনায় আজ দাম কমেছে · ${formattedDiff} টাকা`;
+    }
+
+    return "গতকালের তুলনায় আজ দাম অপরিবর্তিত রয়েছে";
+  }
+
+  return "পণ্যটির বর্তমান বাজারদর ও বাজারভিত্তিক তথ্য।";
+}
+
+export function toProductDetail(product: MarketProduct): ProductDetail {
+  const sortedMarkets = [...product.markets].sort((a, b) => {
+    const avgA = a.average ?? a.min ?? a.max;
+    const avgB = b.average ?? b.min ?? b.max;
+    if (avgA === null && avgB === null) return 0;
+    if (avgA === null) return 1;
+    if (avgB === null) return -1;
+    return avgA - avgB;
+  });
+
+  return {
+    ...product,
+    markets: sortedMarkets,
+    description: buildProductDescription(product),
+    priceSummary: calculateProductPriceSummary(sortedMarkets),
+  };
+}
