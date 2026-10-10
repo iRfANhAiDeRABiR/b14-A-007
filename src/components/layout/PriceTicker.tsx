@@ -16,7 +16,7 @@ function getDirectionBadge(item: TickerProductItem) {
     return {
       symbol: "▲",
       pctText: formattedPct,
-      className: "text-[#1a9951] bg-[#f3fbf4] border border-[#1a9951]/20",
+      className: "text-[#1a9951]",
     };
   }
 
@@ -24,7 +24,7 @@ function getDirectionBadge(item: TickerProductItem) {
     return {
       symbol: "▼",
       pctText: formattedPct,
-      className: "text-[#d03739] bg-[#fff6f5] border border-[#d03739]/20",
+      className: "text-[#d03739]",
     };
   }
 
@@ -32,7 +32,7 @@ function getDirectionBadge(item: TickerProductItem) {
     return {
       symbol: "—",
       pctText: formattedPct ?? "০.০%",
-      className: "text-[#1d271f]/65 bg-[#e1e8e1]/60 border border-[#e1e8e1]",
+      className: "text-[#1d271f]/60",
     };
   }
 
@@ -49,13 +49,13 @@ export default function PriceTicker({
     return (
       <section
         aria-label="লাইভ বাজারদর টিকার লোড হচ্ছে"
-        className="w-full border-b border-[#e1e8e1] bg-[#f0f5f0] overflow-hidden"
+        className="w-full border-b border-[#e1e8e1] bg-white overflow-hidden"
       >
-        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-6 overflow-hidden">
-          <div className="h-5 w-44 rounded bg-[#e1e8e1] animate-pulse shrink-0" />
-          <div className="h-5 w-48 rounded bg-[#e1e8e1] animate-pulse shrink-0" />
-          <div className="h-5 w-40 rounded bg-[#e1e8e1] animate-pulse shrink-0 hidden sm:block" />
-          <div className="h-5 w-44 rounded bg-[#e1e8e1] animate-pulse shrink-0 hidden md:block" />
+        <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center gap-6 overflow-hidden">
+          <div className="h-5 w-44 rounded bg-[#e1e8e1]/70 animate-pulse shrink-0" />
+          <div className="h-5 w-48 rounded bg-[#e1e8e1]/70 animate-pulse shrink-0" />
+          <div className="h-5 w-40 rounded bg-[#e1e8e1]/70 animate-pulse shrink-0 hidden sm:block" />
+          <div className="h-5 w-44 rounded bg-[#e1e8e1]/70 animate-pulse shrink-0 hidden md:block" />
         </div>
       </section>
     );
@@ -65,9 +65,9 @@ export default function PriceTicker({
     return (
       <section
         aria-label="বাজারদর আপডেট বার্তা"
-        className="w-full border-b border-[#e1e8e1] bg-[#f0f5f0] overflow-hidden"
+        className="w-full border-b border-[#e1e8e1] bg-white overflow-hidden"
       >
-        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between gap-4 text-xs sm:text-sm text-[#1d271f]/80">
+        <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4 text-xs sm:text-sm text-[#1d271f]/80">
           <div className="flex items-center gap-2 font-medium">
             <span
               aria-hidden="true"
@@ -83,14 +83,14 @@ export default function PriceTicker({
   return (
     <section
       aria-label="সর্বশেষ বাজারদর টিকার"
-      className="w-full border-b border-[#e1e8e1] bg-[#f0f5f0] overflow-hidden py-2"
+      className="w-full border-b border-[#e1e8e1] bg-white overflow-hidden"
     >
       <div className="ticker-track items-center">
         {[0, 1].map((copyIndex) => (
           <div
             key={copyIndex}
             aria-hidden={copyIndex === 1 ? "true" : undefined}
-            className="flex items-center gap-6 px-3 shrink-0"
+            className="flex items-center shrink-0"
           >
             {validItems.map((item) => {
               const formattedPrice = formatBengaliNumber(item.price, {
@@ -105,19 +105,18 @@ export default function PriceTicker({
               return (
                 <div
                   key={`${copyIndex}-${item.id}`}
-                  className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-[#1d271f] whitespace-nowrap"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 border-r border-[#e1e8e1] text-xs sm:text-sm text-[#1d271f] whitespace-nowrap"
                 >
-                  <span aria-hidden="true" className="text-base">
+                  <span aria-hidden="true" className="text-base leading-none">
                     {item.emoji ?? "📦"}
                   </span>
-                  <span className="font-semibold">{item.name}</span>
-                  <span className="text-[#1d271f]/50">—</span>
-                  <span>
+                  <span className="font-bold text-[#1d271f]">{item.name}</span>
+                  <span className="text-[#1d271f]/80 font-medium">
                     {formattedPrice} টাকা/{item.unit}
                   </span>
                   {badge ? (
                     <span
-                      className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-semibold ${badge.className}`}
+                      className={`inline-flex items-center gap-1 text-xs sm:text-sm font-bold ${badge.className}`}
                     >
                       <span aria-hidden="true">{badge.symbol}</span>
                       <span>{badge.pctText}</span>

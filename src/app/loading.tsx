@@ -7,7 +7,7 @@ import Footer from "@/components/layout/Footer";
 
 export default function HomeLoading() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#fafcfa] text-[#1d271f]">
+    <div className="min-h-screen flex flex-col bg-[#f0f5f0] text-[#1d271f]">
       <Header isLoadingCategories />
       <PriceTicker isLoading />
 
@@ -43,7 +43,7 @@ export default function HomeLoading() {
               title="সব পণ্য"
               subtitle="নিত্যপ্রয়োজনীয় সব পণ্যের সর্বশেষ বাজারদর এক জায়গায় দেখুন।"
             />
-            <ProductGridSkeleton count={8} columns={4} />
+            <ProductGridSkeleton count={9} columns={3} />
           </section>
         </div>
       </main>
@@ -52,3 +52,4 @@ export default function HomeLoading() {
     </div>
   );
 }
+

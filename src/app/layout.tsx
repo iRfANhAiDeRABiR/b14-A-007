@@ -29,7 +29,7 @@ export default function RootLayout({
     >
       <body
         style={{ fontFamily: "var(--font-hind-siliguri), sans-serif" }}
-        className="min-h-screen flex flex-col bg-[#fafcfa] text-[#1d271f] antialiased overflow-x-hidden"
+        className="min-h-screen flex flex-col bg-[#f0f5f0] text-[#1d271f] antialiased overflow-x-hidden"
       >
         {children}
         <Toaster position="top-right" />

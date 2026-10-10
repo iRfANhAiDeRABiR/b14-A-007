@@ -148,3 +148,4 @@ export function formatBengaliShortUnit(rawUnit: unknown): string {
 
   return rawUnit.trim().replace(/^প্রতি\s+/, "");
 }
+

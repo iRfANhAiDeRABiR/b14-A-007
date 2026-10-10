@@ -6,13 +6,13 @@ interface ProductGridSkeletonProps {
 }
 
 export default function ProductGridSkeleton({
-  count = 8,
-  columns = 4,
+  count = 6,
+  columns = 3,
 }: ProductGridSkeletonProps) {
   const gridColsClass =
-    columns === 3
-      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4";
+    columns === 4
+      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4";
 
   return (
     <div
@@ -26,3 +26,4 @@ export default function ProductGridSkeleton({
     </div>
   );
 }
+

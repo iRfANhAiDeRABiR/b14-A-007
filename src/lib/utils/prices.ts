@@ -275,3 +275,4 @@ export function toTickerItems(products: MarketProduct[]): TickerProductItem[] {
       direction: product.direction,
     }));
 }
+

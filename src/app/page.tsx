@@ -30,7 +30,7 @@ export default async function HomePage() {
   const topFallers = getTopPriceFallers(products, 6);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fafcfa] text-[#1d271f]">
+    <div className="min-h-screen flex flex-col bg-[#f0f5f0] text-[#1d271f]">
       <Header categories={categories} />
       <PriceTicker items={tickerItems} />
 

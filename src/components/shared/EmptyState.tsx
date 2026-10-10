@@ -18,3 +18,4 @@ export default function EmptyState({ message, description }: EmptyStateProps) {
     </div>
   );
 }
+

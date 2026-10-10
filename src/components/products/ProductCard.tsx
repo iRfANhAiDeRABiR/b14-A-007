@@ -66,3 +66,4 @@ export default function ProductCard({ product }: ProductCardProps) {
     </Link>
   );
 }
+

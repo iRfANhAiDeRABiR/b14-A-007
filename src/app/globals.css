@@ -32,7 +32,7 @@ html {
 .ticker-track {
   display: flex;
   width: max-content;
-  animation: ticker-marquee 32s linear infinite;
+  animation: ticker-marquee 85s linear infinite;
 }
 
 .ticker-track:hover,

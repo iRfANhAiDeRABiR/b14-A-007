@@ -23,10 +23,11 @@ export default function AllProductsSection({
       />
 
       {products.length > 0 ? (
-        <ProductGrid products={products} columns={4} />
+        <ProductGrid products={products} columns={3} />
       ) : (
         <EmptyState message="এই মুহূর্তে কোনো পণ্যের তথ্য পাওয়া যায়নি।" />
       )}
     </section>
   );
 }
+
