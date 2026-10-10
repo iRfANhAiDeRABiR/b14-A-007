@@ -160,7 +160,10 @@ export default async function ProductDetailPage({
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f0f5f0] text-[#1d271f]">
-      <Header categories={categories} />
+      <Header
+        categories={categories}
+        activeCategorySlug={product.categorySlug ?? undefined}
+      />
       <PriceTicker items={tickerItems} />
 
       <main className="flex-1">

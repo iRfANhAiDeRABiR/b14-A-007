@@ -9,11 +9,13 @@ import AuthActions from "./AuthActions";
 
 interface MobileNavigationProps {
   categories?: CategoryItem[];
+  activeCategorySlug?: string;
   isLoadingCategories?: boolean;
 }
 
 export default function MobileNavigation({
   categories = [],
+  activeCategorySlug,
   isLoadingCategories = false,
 }: MobileNavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -76,6 +78,7 @@ export default function MobileNavigation({
                 </p>
                 <CategoryNav
                   categories={categories}
+                  activeCategorySlug={activeCategorySlug}
                   isLoading={isLoadingCategories}
                   onNavigate={closeMenu}
                   orientation="vertical"

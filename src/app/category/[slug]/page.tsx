@@ -126,7 +126,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f0f5f0] text-[#1d271f]">
-      <Header categories={categories} />
+      <Header
+        categories={categories}
+        activeCategorySlug={resolvedCategory.slug}
+      />
       <PriceTicker items={tickerItems} />
 
       <main className="flex-1">

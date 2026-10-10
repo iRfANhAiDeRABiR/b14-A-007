@@ -6,11 +6,13 @@ import MobileNavigation from "./MobileNavigation";
 
 interface HeaderProps {
   categories?: CategoryItem[];
+  activeCategorySlug?: string;
   isLoadingCategories?: boolean;
 }
 
 export default function Header({
   categories = [],
+  activeCategorySlug,
   isLoadingCategories = false,
 }: HeaderProps) {
   return (
@@ -25,6 +27,7 @@ export default function Header({
 
           <MobileNavigation
             categories={categories}
+            activeCategorySlug={activeCategorySlug}
             isLoadingCategories={isLoadingCategories}
           />
         </div>
@@ -34,6 +37,7 @@ export default function Header({
         <div className="max-w-6xl mx-auto px-4 py-2.5">
           <CategoryNav
             categories={categories}
+            activeCategorySlug={activeCategorySlug}
             isLoading={isLoadingCategories}
           />
         </div>

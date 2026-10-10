@@ -6,6 +6,7 @@ import type { CategoryItem } from "@/types/market";
 
 interface CategoryNavProps {
   categories?: CategoryItem[];
+  activeCategorySlug?: string;
   isLoading?: boolean;
   onNavigate?: () => void;
   orientation?: "horizontal" | "vertical";
@@ -13,6 +14,7 @@ interface CategoryNavProps {
 
 export default function CategoryNav({
   categories = [],
+  activeCategorySlug,
   isLoading = false,
   onNavigate,
   orientation = "horizontal",
@@ -65,7 +67,8 @@ export default function CategoryNav({
 
       {categories.map((category) => {
         const href = `/category/${category.slug}`;
-        const isActive = pathname === href;
+        const isActive =
+          pathname === href || activeCategorySlug === category.slug;
 
         return (
           <Link

@@ -88,13 +88,12 @@ export default function SignUpForm({
         return;
       }
 
-      toast.success("আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
-
       if (data.token) {
-        router.push(safeCallbackUrl);
-      } else {
-        router.push(signInHref);
+        await authClient.signOut();
       }
+
+      toast.success("আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে! অনুগ্রহ করে সাইন ইন করুন।");
+      router.push(signInHref);
       router.refresh();
     } catch {
       const message = "অ্যাকাউন্ট তৈরি করা যাচ্ছে না। আবার চেষ্টা করুন।";

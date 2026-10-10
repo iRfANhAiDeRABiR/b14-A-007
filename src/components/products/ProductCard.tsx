@@ -29,7 +29,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               </div>
 
               <div className="min-w-0">
-                <h3 className="text-base sm:text-lg font-bold text-[#1d271f] group-hover:text-[#05893e] transition-colors truncate">
+                <h3 className="text-base sm:text-lg font-bold text-[#1d271f] group-hover:text-[#05893e] transition-colors leading-snug line-clamp-2 break-words">
                   {product.name}
                 </h3>
                 <p className="text-xs sm:text-sm text-[#1d271f]/65 font-medium">

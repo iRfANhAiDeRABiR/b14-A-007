@@ -50,4 +50,9 @@ html {
     flex-wrap: wrap;
     width: 100%;
   }
+
+  .animate-pulse,
+  .animate-spin {
+    animation: none !important;
+  }
 }
