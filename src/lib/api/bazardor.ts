@@ -130,9 +130,11 @@ export async function getAllCategories(): Promise<CategoryItem[]> {
 export async function getProductsByCategory(
   categorySlug: string
 ): Promise<MarketProduct[]> {
-  const cleanSlug = encodeURIComponent(categorySlug.trim());
+  const params = new URLSearchParams({
+    category: categorySlug.trim(),
+  });
   const { data } = await fetchFromBazarDorApi(
-    `/products?category=${cleanSlug}`
+    `/products?${params.toString()}`
   );
   const rawList = extractArrayPayload(data);
   return normalizeProducts(rawList);

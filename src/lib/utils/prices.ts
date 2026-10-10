@@ -276,3 +276,43 @@ export function toTickerItems(products: MarketProduct[]): TickerProductItem[] {
     }));
 }
 
+export function sortProductsByPrice(
+  products: readonly MarketProduct[],
+  sortOption: import("@/types/market").SortOption
+): MarketProduct[] {
+  if (sortOption === "default") {
+    return [...products];
+  }
+
+  return products
+    .map((product, index) => ({
+      product,
+      index,
+      numericPrice: parseLocalizedNumber(product.currentPrice),
+    }))
+    .sort((a, b) => {
+      if (a.numericPrice === null && b.numericPrice === null) {
+        return a.index - b.index;
+      }
+      if (a.numericPrice === null) {
+        return 1;
+      }
+      if (b.numericPrice === null) {
+        return -1;
+      }
+
+      const diff =
+        sortOption === "price-low-high"
+          ? a.numericPrice - b.numericPrice
+          : b.numericPrice - a.numericPrice;
+
+      if (diff !== 0) {
+        return diff;
+      }
+
+      return a.index - b.index;
+    })
+    .map((entry) => entry.product);
+}
+
+

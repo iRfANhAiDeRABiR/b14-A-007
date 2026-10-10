@@ -39,6 +39,7 @@ export interface RawApiCategory {
 
 export type PriceDirection = "up" | "down" | "unchanged" | "unknown";
 export type PriceChangeDirection = PriceDirection;
+export type SortOption = "default" | "price-low-high" | "price-high-low";
 
 export interface MarketEntry {
   market: string;

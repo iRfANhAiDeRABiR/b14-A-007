@@ -18,6 +18,7 @@ export default function CategoryNav({
   orientation = "horizontal",
 }: CategoryNavProps) {
   const pathname = usePathname();
+  const isHomeActive = pathname === "/";
   const isVertical = orientation === "vertical";
 
   if (isLoading) {
@@ -46,44 +47,47 @@ export default function CategoryNav({
       className={
         isVertical
           ? "flex flex-col gap-1.5 w-full"
-          : "flex flex-wrap items-center gap-3 sm:gap-5"
+          : "flex flex-wrap items-center gap-2.5 sm:gap-4"
       }
     >
-      {categories.length > 0 ? (
-        categories.map((category) => {
-          const href = `/category/${category.slug}`;
-          const isActive = pathname === href;
+      <Link
+        href="/"
+        onClick={onNavigate}
+        aria-current={isHomeActive ? "page" : undefined}
+        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#05893e] ${
+          isHomeActive
+            ? "bg-[#e2f5e9] text-[#05893e] font-bold"
+            : "font-semibold text-[#1d271f] hover:bg-[#f0f5f0] hover:text-[#05893e]"
+        }`}
+      >
+        <span>সব পণ্য</span>
+      </Link>
 
-          return (
-            <Link
-              key={category.slug}
-              href={href}
-              onClick={onNavigate}
-              aria-current={isActive ? "page" : undefined}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#05893e] ${
-                isActive
-                  ? "bg-[#e2f5e9] text-[#05893e] font-bold"
-                  : "font-semibold text-[#1d271f] hover:bg-[#f0f5f0] hover:text-[#05893e]"
-              }`}
-            >
-              {category.icon ? (
-                <span aria-hidden="true" className="text-base leading-none">
-                  {category.icon}
-                </span>
-              ) : null}
-              <span>{category.name}</span>
-            </Link>
-          );
-        })
-      ) : (
-        <Link
-          href="/"
-          onClick={onNavigate}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm font-semibold text-[#05893e]"
-        >
-          <span>সব পণ্য</span>
-        </Link>
-      )}
+      {categories.map((category) => {
+        const href = `/category/${category.slug}`;
+        const isActive = pathname === href;
+
+        return (
+          <Link
+            key={category.slug}
+            href={href}
+            onClick={onNavigate}
+            aria-current={isActive ? "page" : undefined}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#05893e] ${
+              isActive
+                ? "bg-[#e2f5e9] text-[#05893e] font-bold"
+                : "font-semibold text-[#1d271f] hover:bg-[#f0f5f0] hover:text-[#05893e]"
+            }`}
+          >
+            {category.icon ? (
+              <span aria-hidden="true" className="text-base leading-none">
+                {category.icon}
+              </span>
+            ) : null}
+            <span>{category.name}</span>
+          </Link>
+        );
+      })}
     </nav>
   );
 }
