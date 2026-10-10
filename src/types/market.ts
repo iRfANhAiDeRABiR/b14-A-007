@@ -17,3 +17,4 @@ export interface TickerProductItem {
   changePercent: string | number;
   direction: PriceChangeDirection;
 }
+
