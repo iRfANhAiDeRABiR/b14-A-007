@@ -2,6 +2,52 @@
 @import "@heroui/styles";
 
 :root {
-  --accent: #059669;
-  --accent-foreground: #ffffff;
+  --accent: #05893e;
+  --accent-foreground: #f3fbf4;
+  --brand-primary: #05893e;
+  --brand-primary-strong: #047f39;
+  --brand-primary-content: #f3fbf4;
+  --base-100: #fafcfa;
+  --base-200: #f0f5f0;
+  --base-300: #e1e8e1;
+  --base-content: #1d271f;
+  --status-success: #1a9951;
+  --status-error: #d03739;
+  --status-error-content: #fff6f5;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes ticker-marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker-marquee 32s linear infinite;
+}
+
+.ticker-track:hover,
+.ticker-track:focus-within {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .ticker-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: 100%;
+  }
 }
