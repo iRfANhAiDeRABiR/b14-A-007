@@ -59,7 +59,10 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
       categories={categories}
       tickerItems={tickerItems}
     >
-      <AuthRedirectToast reason={redirectReason} />
+      <AuthRedirectToast
+        reason={redirectReason}
+        callbackUrl={safeCallbackUrl}
+      />
       <SignInForm
         callbackUrl={safeCallbackUrl}
         oauthError={oauthError}

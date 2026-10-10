@@ -156,3 +156,28 @@ export function formatBengaliShortUnit(rawUnit: unknown): string {
   return rawUnit.trim().replace(/^প্রতি\s+/, "");
 }
 
+export function formatBengaliDate(
+  value: Date | string | number | null | undefined
+): string | null {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  try {
+    return new Intl.DateTimeFormat("bn-BD", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "Asia/Dhaka",
+    }).format(date);
+  } catch {
+    return null;
+  }
+}
+
+

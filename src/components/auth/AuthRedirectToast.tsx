@@ -5,9 +5,13 @@ import toast from "react-hot-toast";
 
 interface AuthRedirectToastProps {
   reason?: string;
+  callbackUrl?: string;
 }
 
-export default function AuthRedirectToast({ reason }: AuthRedirectToastProps) {
+export default function AuthRedirectToast({
+  reason,
+  callbackUrl,
+}: AuthRedirectToastProps) {
   const hasShownRef = useRef(false);
 
   useEffect(() => {
@@ -16,7 +20,15 @@ export default function AuthRedirectToast({ reason }: AuthRedirectToastProps) {
     }
 
     hasShownRef.current = true;
-    toast.error("পণ্যের বিস্তারিত তথ্য দেখতে প্রথমে সাইন ইন করুন।", {
+    const isProfileRoute = Boolean(
+      callbackUrl &&
+        (callbackUrl === "/profile" || callbackUrl.startsWith("/profile/"))
+    );
+    const message = isProfileRoute
+      ? "প্রোফাইল দেখতে বা তথ্য পরিবর্তন করতে প্রথমে সাইন ইন করুন।"
+      : "পণ্যের বিস্তারিত তথ্য দেখতে প্রথমে সাইন ইন করুন।";
+
+    toast.error(message, {
       id: "auth-required-toast",
     });
 
@@ -31,8 +43,9 @@ export default function AuthRedirectToast({ reason }: AuthRedirectToastProps) {
         window.history.replaceState(null, "", nextRelativeUrl);
       }
     }
-  }, [reason]);
+  }, [reason, callbackUrl]);
 
   return null;
 }
+
 
