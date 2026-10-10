@@ -90,7 +90,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
-    minPasswordLength: 6,
+    minPasswordLength: 8,
     maxPasswordLength: 128,
   },
   socialProviders: buildSocialProviders(),
@@ -99,3 +99,4 @@ export const auth = betterAuth({
 
 export type AuthSession = typeof auth.$Infer.Session;
 export type AuthUser = typeof auth.$Infer.Session.user;
+

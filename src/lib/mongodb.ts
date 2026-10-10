@@ -112,3 +112,4 @@ export const mongoClientProxy: MongoClient = new Proxy({} as MongoClient, {
     return typeof value === "function" ? value.bind(client) : value;
   },
 });
+

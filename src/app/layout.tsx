@@ -26,6 +26,7 @@ export default function RootLayout({
       lang="bn"
       className={`${hindSiliguri.variable} light`}
       data-theme="light"
+      data-scroll-behavior="smooth"
     >
       <body
         style={{ fontFamily: "var(--font-hind-siliguri), sans-serif" }}
