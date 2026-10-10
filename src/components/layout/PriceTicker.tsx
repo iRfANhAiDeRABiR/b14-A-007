@@ -1,4 +1,8 @@
 import type { TickerProductItem } from "@/types/market";
+import {
+  formatBengaliNumber,
+  formatBengaliPercentage,
+} from "@/lib/utils/bengali";
 
 interface PriceTickerProps {
   items?: TickerProductItem[];
@@ -6,30 +10,41 @@ interface PriceTickerProps {
 }
 
 function getDirectionBadge(item: TickerProductItem) {
-  if (item.direction === "up") {
+  const formattedPct = formatBengaliPercentage(item.changePercent);
+
+  if (item.direction === "up" && formattedPct) {
     return {
       symbol: "▲",
-      className: "text-[#1a9951] bg-[#f3fbf4]",
+      pctText: formattedPct,
+      className: "text-[#1a9951] bg-[#f3fbf4] border border-[#1a9951]/20",
     };
   }
 
-  if (item.direction === "down") {
+  if (item.direction === "down" && formattedPct) {
     return {
       symbol: "▼",
-      className: "text-[#d03739] bg-[#fff6f5]",
+      pctText: formattedPct,
+      className: "text-[#d03739] bg-[#fff6f5] border border-[#d03739]/20",
     };
   }
 
-  return {
-    symbol: "—",
-    className: "text-[#1d271f]/65 bg-[#e1e8e1]/60",
-  };
+  if (item.direction === "unchanged") {
+    return {
+      symbol: "—",
+      pctText: formattedPct ?? "০.০%",
+      className: "text-[#1d271f]/65 bg-[#e1e8e1]/60 border border-[#e1e8e1]",
+    };
+  }
+
+  return null;
 }
 
 export default function PriceTicker({
   items = [],
   isLoading = false,
 }: PriceTickerProps) {
+  const validItems = items.filter((item) => item.price !== null);
+
   if (isLoading) {
     return (
       <section
@@ -46,7 +61,7 @@ export default function PriceTicker({
     );
   }
 
-  if (items.length === 0) {
+  if (validItems.length === 0) {
     return (
       <section
         aria-label="বাজারদর আপডেট বার্তা"
@@ -56,14 +71,9 @@ export default function PriceTicker({
           <div className="flex items-center gap-2 font-medium">
             <span
               aria-hidden="true"
-              className="inline-block w-2 h-2 rounded-full bg-[#05893e] animate-pulse"
+              className="inline-block w-2 h-2 rounded-full bg-[#05893e]"
             />
-            <span>আজকের বাজারদর শীঘ্রই দেখানো হবে</span>
-          </div>
-          <div className="hidden sm:flex items-center gap-3 text-xs text-[#1d271f]/60">
-            <span className="h-4 w-28 rounded bg-[#e1e8e1]/80 animate-pulse" />
-            <span className="h-4 w-32 rounded bg-[#e1e8e1]/80 animate-pulse" />
-            <span className="h-4 w-24 rounded bg-[#e1e8e1]/80 animate-pulse" />
+            <span>এই মুহূর্তে টিকারে দেখানোর মতো বাজারদর পাওয়া যায়নি</span>
           </div>
         </div>
       </section>
@@ -82,7 +92,14 @@ export default function PriceTicker({
             aria-hidden={copyIndex === 1 ? "true" : undefined}
             className="flex items-center gap-6 px-3 shrink-0"
           >
-            {items.map((item) => {
+            {validItems.map((item) => {
+              const formattedPrice = formatBengaliNumber(item.price, {
+                maximumFractionDigits: 2,
+              });
+              if (!formattedPrice) {
+                return null;
+              }
+
               const badge = getDirectionBadge(item);
 
               return (
@@ -91,19 +108,21 @@ export default function PriceTicker({
                   className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-[#1d271f] whitespace-nowrap"
                 >
                   <span aria-hidden="true" className="text-base">
-                    {item.emoji}
+                    {item.emoji ?? "📦"}
                   </span>
                   <span className="font-semibold">{item.name}</span>
                   <span className="text-[#1d271f]/50">—</span>
                   <span>
-                    {item.price} টাকা/{item.unit}
+                    {formattedPrice} টাকা/{item.unit}
                   </span>
-                  <span
-                    className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-semibold ${badge.className}`}
-                  >
-                    <span>{badge.symbol}</span>
-                    <span>{item.changePercent}%</span>
-                  </span>
+                  {badge ? (
+                    <span
+                      className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-semibold ${badge.className}`}
+                    >
+                      <span aria-hidden="true">{badge.symbol}</span>
+                      <span>{badge.pctText}</span>
+                    </span>
+                  ) : null}
                 </div>
               );
             })}
@@ -113,4 +132,3 @@ export default function PriceTicker({
     </section>
   );
 }
-
