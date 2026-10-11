@@ -1,14 +1,21 @@
+"use client";
+
+import { useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, buttonVariants } from "@heroui/react";
 import {
   ArrowChevronRight,
   ArrowLeft,
+  ArrowRightFromSquare,
   Calendar,
   Envelope,
   Pencil,
   Person,
   ShieldCheck,
 } from "@gravity-ui/icons";
+import toast from "react-hot-toast";
+import { authClient } from "@/lib/auth-client";
 import { formatBengaliDate } from "@/lib/utils/bengali";
 import ProfileAvatar from "./ProfileAvatar";
 
@@ -26,9 +33,42 @@ interface ProfileCardProps {
 }
 
 export default function ProfileCard({ user }: ProfileCardProps) {
+  const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const isSigningOutRef = useRef(false);
+
   const displayName = user.name?.trim() || "ব্যবহারকারী";
   const formattedCreatedAt = formatBengaliDate(user.createdAt);
   const hasVerificationStatus = typeof user.emailVerified === "boolean";
+
+  async function handleSignOut() {
+    if (isSigningOutRef.current) {
+      return;
+    }
+
+    isSigningOutRef.current = true;
+    setIsSigningOut(true);
+
+    try {
+      const { error } = await authClient.signOut();
+
+      if (error) {
+        toast.error("সাইন আউট করা যায়নি। আবার চেষ্টা করুন।");
+        isSigningOutRef.current = false;
+        setIsSigningOut(false);
+        return;
+      }
+
+      toast.success("সফলভাবে সাইন আউট হয়েছে।");
+      router.push("/");
+      router.refresh();
+    } catch {
+      toast.error("সাইন আউট করা যায়নি। আবার চেষ্টা করুন।");
+    } finally {
+      isSigningOutRef.current = false;
+      setIsSigningOut(false);
+    }
+  }
 
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-6">
@@ -99,16 +139,15 @@ export default function ProfileCard({ user }: ProfileCardProps) {
             </div>
 
             <div className="sm:shrink-0">
-              <Link
-                href="/profile/update"
-                className={`${buttonVariants({
-                  variant: "primary",
-                  size: "md",
-                })} w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#05893e] hover:bg-[#047f39] text-[#f3fbf4] font-semibold px-5 py-2.5 rounded-lg transition-colors`}
+              <button
+                type="button"
+                disabled={isSigningOut}
+                onClick={handleSignOut}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-[#d03739]/30 bg-[#fff6f5] hover:bg-[#d03739] text-[#d03739] hover:text-white font-semibold px-5 py-2.5 rounded-lg transition-colors cursor-pointer disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d03739]"
               >
-                <Pencil className="w-4 h-4" aria-hidden="true" />
-                <span>তথ্য আপডেট করুন</span>
-              </Link>
+                <ArrowRightFromSquare className="w-4 h-4" aria-hidden="true" />
+                <span>{isSigningOut ? "সাইন আউট হচ্ছে..." : "সাইন আউট"}</span>
+              </button>
             </div>
           </div>
         </CardContent>
