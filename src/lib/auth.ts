@@ -19,19 +19,82 @@ function getValidatedAuthSecret(): string {
   return secret;
 }
 
-function getAuthBaseUrl(): string {
-  const configuredUrl = process.env.BETTER_AUTH_URL?.trim();
-  if (configuredUrl) {
-    return configuredUrl;
-  }
-
-  if (process.env.NODE_ENV === "production") {
-    throw new Error(
-      "Missing required environment variable: BETTER_AUTH_URL in production."
+function isLocalhostUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return (
+      parsed.hostname === "localhost" ||
+      parsed.hostname === "127.0.0.1" ||
+      parsed.hostname === "::1"
     );
+  } catch {
+    return url.includes("localhost") || url.includes("127.0.0.1");
+  }
+}
+
+function normalizeOriginUrl(rawUrl: string): string {
+  const trimmed = rawUrl.trim().replace(/\/+$/, "");
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
+
+function getAuthBaseUrl(): string {
+  const isProduction =
+    process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
+  const configuredUrl = process.env.BETTER_AUTH_URL?.trim();
+
+  if (configuredUrl && (!isProduction || !isLocalhostUrl(configuredUrl))) {
+    return normalizeOriginUrl(configuredUrl);
   }
 
-  return "http://localhost:3000";
+  const vercelProductionUrl =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ||
+    process.env.VERCEL_BRANCH_URL?.trim() ||
+    process.env.VERCEL_URL?.trim();
+
+  if (vercelProductionUrl) {
+    return normalizeOriginUrl(vercelProductionUrl);
+  }
+
+  if (isProduction) {
+    return "https://b14-a-007-9pcg.vercel.app";
+  }
+
+  return configuredUrl
+    ? normalizeOriginUrl(configuredUrl)
+    : "http://localhost:3000";
+}
+
+function getTrustedOrigins(): string[] {
+  const origins = new Set<string>([
+    getAuthBaseUrl(),
+    "https://b14-a-007-9pcg.vercel.app",
+    "https://*.vercel.app",
+  ]);
+
+  const envUrls = [
+    process.env.BETTER_AUTH_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.VERCEL_BRANCH_URL,
+    process.env.VERCEL_URL,
+  ];
+
+  for (const raw of envUrls) {
+    if (raw?.trim()) {
+      const normalized = normalizeOriginUrl(raw);
+      if (process.env.NODE_ENV !== "production" || !isLocalhostUrl(normalized)) {
+        origins.add(normalized);
+      }
+    }
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    origins.add("http://localhost:3000");
+  }
+
+  return Array.from(origins);
 }
 
 function buildSocialProviders() {
@@ -76,6 +139,7 @@ const useReplicaTransactions = isMongoReplicaSetConfigured();
 export const auth = betterAuth({
   secret: getValidatedAuthSecret(),
   baseURL: getAuthBaseUrl(),
+  trustedOrigins: getTrustedOrigins(),
   database: mongodbAdapter(
     db,
     useReplicaTransactions

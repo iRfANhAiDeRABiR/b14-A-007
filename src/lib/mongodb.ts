@@ -16,9 +16,7 @@ const mongoCache: GlobalMongoCache = globalForMongo.__bazardorMongoCache ?? {
   clientPromise: null,
 };
 
-if (process.env.NODE_ENV !== "production") {
-  globalForMongo.__bazardorMongoCache = mongoCache;
-}
+globalForMongo.__bazardorMongoCache = mongoCache;
 
 function getValidatedMongoUri(): string {
   const uri = process.env.MONGODB_URI?.trim();

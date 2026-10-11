@@ -257,5 +257,5 @@ This application uses Next.js Server Components, dynamic routes, Better Auth rou
 
 ## 🔗 L. Links
 
-- **Live Website:** Not deployed yet *(will be deployed and updated in Step 12)*
+- **Live Website:** [https://b14-a-007-9pcg.vercel.app](https://b14-a-007-9pcg.vercel.app)
 - **GitHub Repository:** [https://github.com/iRfANhAiDeRABiR/b14-A-007](https://github.com/iRfANhAiDeRABiR/b14-A-007)
